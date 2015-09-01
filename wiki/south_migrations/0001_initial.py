@@ -14,7 +14,7 @@ class Migration(SchemaMigration):
             ('current_revision', self.gf('django.db.models.fields.related.OneToOneField')(blank=True, related_name=u'current_set', unique=True, null=True, to=orm['wiki.ArticleRevision'])),
             ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-            ('owner', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name=u'owned_articles', null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
+            ('owner', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name=u'owned_articles', null=True, on_delete=models.SET_NULL, to=orm['users.PolylanUser'])),
             ('group', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.Group'], null=True, on_delete=models.SET_NULL, blank=True)),
             ('group_read', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('group_write', self.gf('django.db.models.fields.BooleanField')(default=True)),
@@ -42,8 +42,8 @@ class Migration(SchemaMigration):
             ('revision_number', self.gf('django.db.models.fields.IntegerField')()),
             ('user_message', self.gf('django.db.models.fields.TextField')(blank=True)),
             ('automatic_log', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('ip_address', self.gf('django.db.models.fields.IPAddressField')(max_length=15, null=True, blank=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True, on_delete=models.SET_NULL, blank=True)),
+            ('ip_address', self.gf('django.db.models.fields.GenericIPAddressField')(max_length=39, null=True, blank=True)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.PolylanUser'], null=True, on_delete=models.SET_NULL, blank=True)),
             ('modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('previous_revision', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wiki.ArticleRevision'], null=True, on_delete=models.SET_NULL, blank=True)),
@@ -57,23 +57,6 @@ class Migration(SchemaMigration):
 
         # Adding unique constraint on 'ArticleRevision', fields ['article', 'revision_number']
         db.create_unique(u'wiki_articlerevision', ['article_id', 'revision_number'])
-
-        # Adding model 'URLPath'
-        db.create_table(u'wiki_urlpath', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('article', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wiki.Article'])),
-            ('slug', self.gf('django.db.models.fields.SlugField')(max_length=50, null=True, blank=True)),
-            ('site', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sites.Site'])),
-            ('parent', self.gf('mptt.fields.TreeForeignKey')(blank=True, related_name=u'children', null=True, to=orm['wiki.URLPath'])),
-            (u'lft', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
-            (u'rght', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
-            (u'tree_id', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
-            (u'level', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
-        ))
-        db.send_create_signal(u'wiki', ['URLPath'])
-
-        # Adding unique constraint on 'URLPath', fields ['site', 'parent', 'slug']
-        db.create_unique(u'wiki_urlpath', ['site_id', 'parent_id', 'slug'])
 
         # Adding model 'ArticlePlugin'
         db.create_table(u'wiki_articleplugin', (
@@ -119,8 +102,8 @@ class Migration(SchemaMigration):
             ('revision_number', self.gf('django.db.models.fields.IntegerField')()),
             ('user_message', self.gf('django.db.models.fields.TextField')(blank=True)),
             ('automatic_log', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('ip_address', self.gf('django.db.models.fields.IPAddressField')(max_length=15, null=True, blank=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True, on_delete=models.SET_NULL, blank=True)),
+            ('ip_address', self.gf('django.db.models.fields.GenericIPAddressField')(max_length=39, null=True, blank=True)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.PolylanUser'], null=True, on_delete=models.SET_NULL, blank=True)),
             ('modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('previous_revision', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wiki.RevisionPluginRevision'], null=True, on_delete=models.SET_NULL, blank=True)),
@@ -129,6 +112,23 @@ class Migration(SchemaMigration):
             ('plugin', self.gf('django.db.models.fields.related.ForeignKey')(related_name=u'revision_set', to=orm['wiki.RevisionPlugin'])),
         ))
         db.send_create_signal(u'wiki', ['RevisionPluginRevision'])
+
+        # Adding model 'URLPath'
+        db.create_table(u'wiki_urlpath', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('article', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wiki.Article'])),
+            ('slug', self.gf('django.db.models.fields.SlugField')(max_length=50, null=True, blank=True)),
+            ('site', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sites.Site'])),
+            ('parent', self.gf('mptt.fields.TreeForeignKey')(blank=True, related_name=u'children', null=True, to=orm['wiki.URLPath'])),
+            (u'lft', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+            (u'rght', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+            (u'tree_id', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+            (u'level', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
+        ))
+        db.send_create_signal(u'wiki', ['URLPath'])
+
+        # Adding unique constraint on 'URLPath', fields ['site', 'parent', 'slug']
+        db.create_unique(u'wiki_urlpath', ['site_id', 'parent_id', 'slug'])
 
 
     def backwards(self, orm):
@@ -150,9 +150,6 @@ class Migration(SchemaMigration):
         # Deleting model 'ArticleRevision'
         db.delete_table(u'wiki_articlerevision')
 
-        # Deleting model 'URLPath'
-        db.delete_table(u'wiki_urlpath')
-
         # Deleting model 'ArticlePlugin'
         db.delete_table(u'wiki_articleplugin')
 
@@ -171,6 +168,9 @@ class Migration(SchemaMigration):
         # Deleting model 'RevisionPluginRevision'
         db.delete_table(u'wiki_revisionpluginrevision')
 
+        # Deleting model 'URLPath'
+        db.delete_table(u'wiki_urlpath')
+
 
     models = {
         u'auth.group': {
@@ -186,22 +186,6 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
         },
-        u'auth.user': {
-            'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
-            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Group']"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
-            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Permission']"}),
-            'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
-        },
         u'contenttypes.contenttype': {
             'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
             'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
@@ -215,6 +199,65 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
         },
+        u'users.polylanuser': {
+            'Meta': {'object_name': 'PolylanUser'},
+            'auto_subscribe': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'avatar': ('django.db.models.fields.files.ImageField', [], {'default': "'uploads/avatars/apadavatar.png'", 'max_length': '100'}),
+            'canton': ('django.db.models.fields.CharField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
+            'code_postal': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
+            'crossAuthKey': ('django.db.models.fields.CharField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
+            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'date_naissance': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
+            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
+            'facebook': ('django.db.models.fields.CharField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
+            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
+            'google': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
+            'gpg_password': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Group']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'intranetBG': ('django.db.models.fields.CharField', [], {'default': "'http://nik.bot.nu/o1160214.jpg'", 'max_length': '255'}),
+            'intranetButtonPos': ('django.db.models.fields.CharField', [], {'default': "'droit'", 'max_length': '10'}),
+            'intranetLastActive': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'intranetLastChatState': ('django.db.models.fields.CharField', [], {'default': "'timeout'", 'max_length': '255'}),
+            'intranetLastPing': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'jabber': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
+            'language': ('django.db.models.fields.CharField', [], {'default': "'fr'", 'max_length': '5'}),
+            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
+            'mailing_liste': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'markup': ('django.db.models.fields.CharField', [], {'default': "'bbcode'", 'max_length': '15'}),
+            'nombreDeSous': ('django.db.models.fields.FloatField', [], {'default': '0'}),
+            'nt_password_0': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
+            'nt_password_1': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
+            'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
+            'pays': ('django.db.models.fields.CharField', [], {'default': "'CH'", 'max_length': '80'}),
+            'photo': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
+            'post_count': ('django.db.models.fields.IntegerField', [], {'default': '0', 'blank': 'True'}),
+            'provenance': ('django.db.models.fields.CharField', [], {'max_length': '5'}),
+            'recevoir_mail': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'rue': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
+            'rue_complement': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
+            'sciper': ('django.db.models.fields.CharField', [], {'max_length': '6', 'null': 'True', 'blank': 'True'}),
+            'sexe': ('django.db.models.fields.CharField', [], {'default': "'f'", 'max_length': '1'}),
+            'show_signatures': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'show_smilies': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'signature': ('django.db.models.fields.TextField', [], {'default': "''", 'max_length': '500', 'blank': 'True'}),
+            'signature_html': ('django.db.models.fields.TextField', [], {'default': "''", 'max_length': '500', 'blank': 'True'}),
+            'staffComment': ('django.db.models.fields.CharField', [], {'max_length': '2000', 'null': 'True', 'blank': 'True'}),
+            'status': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
+            'tel': ('django.db.models.fields.CharField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
+            'tel_portable': ('django.db.models.fields.CharField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
+            'time_zone': ('django.db.models.fields.CharField', [], {'default': "'Europe/Zurich'", 'max_length': '50'}),
+            'tshirt': ('django.db.models.fields.CharField', [], {'default': "'nondefini'", 'max_length': '10'}),
+            'twitter': ('django.db.models.fields.CharField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
+            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Permission']"}),
+            'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'}),
+            'ville': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
+            'website': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'})
+        },
         u'wiki.article': {
             'Meta': {'object_name': 'Article'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
@@ -226,7 +269,7 @@ class Migration(SchemaMigration):
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'other_read': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'other_write': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'owner': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "u'owned_articles'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"})
+            'owner': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "u'owned_articles'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['users.PolylanUser']"})
         },
         u'wiki.articleforobject': {
             'Meta': {'unique_together': "((u'content_type', u'object_id'),)", 'object_name': 'ArticleForObject'},
@@ -251,13 +294,13 @@ class Migration(SchemaMigration):
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'deleted': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'ip_address': ('django.db.models.fields.IPAddressField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
+            'ip_address': ('django.db.models.fields.GenericIPAddressField', [], {'max_length': '39', 'null': 'True', 'blank': 'True'}),
             'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'previous_revision': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['wiki.ArticleRevision']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'revision_number': ('django.db.models.fields.IntegerField', [], {}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.PolylanUser']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'user_message': ('django.db.models.fields.TextField', [], {'blank': 'True'})
         },
         u'wiki.reusableplugin': {
@@ -276,13 +319,13 @@ class Migration(SchemaMigration):
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'deleted': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'ip_address': ('django.db.models.fields.IPAddressField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
+            'ip_address': ('django.db.models.fields.GenericIPAddressField', [], {'max_length': '39', 'null': 'True', 'blank': 'True'}),
             'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'plugin': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'revision_set'", 'to': u"orm['wiki.RevisionPlugin']"}),
             'previous_revision': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['wiki.RevisionPluginRevision']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'revision_number': ('django.db.models.fields.IntegerField', [], {}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.PolylanUser']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'user_message': ('django.db.models.fields.TextField', [], {'blank': 'True'})
         },
         u'wiki.simpleplugin': {
