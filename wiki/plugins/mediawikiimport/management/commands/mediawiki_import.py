@@ -141,10 +141,13 @@ class Command(BaseCommand):
                     user = get_user_model().objects.get(
                         username=history_page['user'])
             except get_user_model().DoesNotExist:
-                print(
-                    "\tCannot found user with username={}. Use --user-matching \"{}:<user_pk>\" to manualy set it".format(
-                        history_page['user'], history_page['user'])
-                )
+                try:
+                    print(
+                        u"\tCannot found user with username={}. Use --user-matching \"{}:<user_pk>\" to manualy set it".format(
+                            history_page['user'], history_page['user'])
+                    )
+                except:
+                    pass
                 user = None
 
             article_revision = ArticleRevision()
