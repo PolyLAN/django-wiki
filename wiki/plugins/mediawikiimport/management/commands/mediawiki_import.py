@@ -180,10 +180,6 @@ class Command(BaseCommand):
 
         article.save()
 
-        upath = URLPath.objects.create(site=current_site, parent=url_root, slug=urltitle, article=article)
-        article.add_object_relation(upath)
-
-        self.matching_old_link_new_link[page.title] = upath.article.get_absolute_url()
         upath = URLPath.objects.create(
             site=current_site,
             parent=url_root,
