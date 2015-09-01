@@ -201,9 +201,12 @@ class Command(BaseCommand):
             print("Updating links of {}".format(article_revision.title))
             for id_from, id_to in six.iteritems(
                     self.matching_old_link_new_link):
-                print(
-                    "Replacing ({} \"wikilink\") with ({})".format(id_from, id_to)
-                )
+                try:
+                    print(
+                        "Replacing ({} \"wikilink\") with ({})".format(id_from, id_to)
+                    )
+                except:
+                    pass
                 article_revision.content = article_revision.content.replace(
                     "({} \"wikilink\")".format(id_from),
                     "({})".format(id_to)
