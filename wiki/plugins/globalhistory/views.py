@@ -23,4 +23,4 @@ class GlobalHistory(ListView):
         if self.request.user.is_staff:
             return self.model.objects.can_read(self.request.user).order_by('-modified')
         else:
-            return None
+            return self.model.objects.get_empty_query_set()
