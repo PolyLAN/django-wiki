@@ -20,4 +20,7 @@ class GlobalHistory(ListView):
             request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.model.objects.can_read(self.request.user).order_by('-modified')
+        if request.user.is_staff:
+            return self.model.objects.can_read(self.request.user).order_by('-modified')
+        else:
+            return None
