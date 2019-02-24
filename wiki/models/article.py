@@ -222,6 +222,8 @@ class Article(models.Model):
         if cached_content is None:
             cached_content = self.render()
             cache.set(cache_key, cached_content, settings.CACHE_TIMEOUT)
+        else:
+            cached_content = mark_safe(cached_content)
         return cached_content
 
     def clear_cache(self):
